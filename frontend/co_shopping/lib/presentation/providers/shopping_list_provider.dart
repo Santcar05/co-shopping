@@ -1,54 +1,66 @@
 import 'package:co_shopping/data/models/shopping_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Definimos el StateNotifier para manejar la lógica
 class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
   ShoppingListNotifier()
       : super([
           ShoppingItem(
-            id: '1',
-            name: 'Organic Kale',
-            subtitle: 'Added by Sarah',
-            category: 'PRODUCE',
-          ),
+              id: '1',
+              name: 'Organic Kale',
+              subtitle: 'Added by Sarah',
+              category: 'PRODUCE'),
           ShoppingItem(
-            id: '2',
-            name: 'Honeycrisp Apples',
-            subtitle: 'AI Sorted',
-            category: 'PRODUCE',
-            isAI: true,
-          ),
+              id: '2',
+              name: 'Honeycrisp Apples',
+              subtitle: 'AI Sorted',
+              category: 'PRODUCE',
+              isAI: true),
           ShoppingItem(
-            id: '3',
-            name: 'Pasture Raised Eggs',
-            subtitle: 'Sarah got this',
-            category: 'DAIRY & EGGS',
-            isChecked: true,
-          ),
+              id: '3',
+              name: 'Pasture Raised Eggs',
+              subtitle: 'Sarah got this',
+              category: 'DAIRY & EGGS',
+              isChecked: true),
         ]);
 
-  // Función para alternar el estado de un item
   void toggleItem(String id) {
     state = [
       for (final item in state)
         if (item.id == id) item.copyWith(isChecked: !item.isChecked) else item,
     ];
-    // TODO: Aquí llamarías al SyncEngine para enviar el cambio por WebRTC
   }
 
-  // Función para agregar desde el Smart Refill
   void addItem(String name, String category) {
-    final newItem = ShoppingItem(
-      id: DateTime.now().toString(), // ID temporal
-      name: name,
-      subtitle: "Added manually",
-      category: category,
-    );
-    state = [...state, newItem];
+    state = [
+      ...state,
+      ShoppingItem(
+        id: DateTime.now().toString(),
+        name: name,
+        subtitle: "Added manually",
+        category: category,
+      )
+    ];
+  }
+
+  void deleteItem(String id) {
+    state = state.where((item) => item.id != id).toList();
+  }
+
+  void toggleHighlight(String id) {
+    state = state
+        .map((item) => item.id == id
+            ? item.copyWith(isHighlighted: !item.isHighlighted)
+            : item)
+        .toList();
+  }
+
+  void editItem(String id, String newName) {
+    state = state
+        .map((item) => item.id == id ? item.copyWith(name: newName) : item)
+        .toList();
   }
 }
 
-// El provider que usaremos en la UI
 final shoppingListProvider =
     StateNotifierProvider<ShoppingListNotifier, List<ShoppingItem>>((ref) {
   return ShoppingListNotifier();

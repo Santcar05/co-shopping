@@ -5,6 +5,7 @@ class ShoppingItem {
   final String category;
   final bool isChecked;
   final bool isAI;
+  final bool isHighlighted; // <-- Nuevo campo
 
   ShoppingItem({
     required this.id,
@@ -13,17 +14,18 @@ class ShoppingItem {
     required this.category,
     this.isChecked = false,
     this.isAI = false,
+    this.isHighlighted = false, // Por defecto falso
   });
 
-  // Copia con cambios (para inmutabilidad de Riverpod)
-  ShoppingItem copyWith({bool? isChecked}) {
+  ShoppingItem copyWith({bool? isChecked, bool? isHighlighted, String? name}) {
     return ShoppingItem(
       id: id,
-      name: name,
+      name: name ?? this.name,
       subtitle: subtitle,
       category: category,
       isChecked: isChecked ?? this.isChecked,
       isAI: isAI,
+      isHighlighted: isHighlighted ?? this.isHighlighted,
     );
   }
 }

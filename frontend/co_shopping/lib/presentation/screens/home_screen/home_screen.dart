@@ -1,4 +1,5 @@
 import 'package:co_shopping/presentation/screens/home_screen/widgets/item_list_card.dart';
+import 'package:co_shopping/presentation/screens/home_screen/widgets/item_list_section.dart';
 import 'package:co_shopping/presentation/screens/sync_partner_screen/sync_partner_screen.dart';
 import 'package:co_shopping/presentation/widgets/smart_refill_card.dart';
 import 'package:flutter/material.dart';
