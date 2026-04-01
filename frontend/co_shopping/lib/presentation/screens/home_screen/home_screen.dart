@@ -1,4 +1,3 @@
-import 'package:co_shopping/presentation/screens/home_screen/widgets/item_list_card.dart';
 import 'package:co_shopping/presentation/screens/home_screen/widgets/item_list_section.dart';
 import 'package:co_shopping/presentation/screens/sync_partner_screen/sync_partner_screen.dart';
 import 'package:co_shopping/presentation/widgets/smart_refill_card.dart';
@@ -10,92 +9,112 @@ import 'package:co_shopping/presentation/providers/shopping_list_provider.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  // Función para mostrar el modal de creación
   void _showAddItemDialog(BuildContext context, WidgetRef ref) {
     final nameController = TextEditingController();
-    String selectedCategory = 'PRODUCE'; // Categoría por defecto
+    String tempCategory = 'PRODUCE'; // Categoría inicial
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-            bottom:
-                MediaQuery.of(context).viewInsets.bottom), // Ajuste por teclado
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("Add New Item",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 20),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  hintText: "Item name (e.g. Bananas)",
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
+      builder: (context) => StatefulBuilder(
+        // Permite actualizar el estado dentro del modal
+        builder: (context, setModalState) => Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Add New Item",
+                    style:
+                        TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: nameController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: "Item name (e.g. Greek Yogurt)",
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide.none),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              const Text("Category",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              // Selector de categoría simple
-              Wrap(
-                spacing: 10,
-                children: ['PRODUCE', 'DAIRY & EGGS'].map((cat) {
-                  return ChoiceChip(
-                    label: Text(cat),
-                    selected: selectedCategory == cat,
-                    onSelected: (bool selected) {
-                      // Nota: Para actualizar el estado dentro del modal
-                      // necesitarías un StatefulBuilder, pero para este ejemplo
-                      // lo simplificamos.
-                    },
-                    selectedColor: AppColors.primaryGreen.withOpacity(0.2),
-                    labelStyle: TextStyle(
-                        color: selectedCategory == cat
-                            ? AppColors.primaryGreen
-                            : Colors.black),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  if (nameController.text.isNotEmpty) {
-                    ref
-                        .read(shoppingListProvider.notifier)
-                        .addItem(nameController.text, selectedCategory);
-                    Navigator.pop(context);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryGreen,
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                ),
-                child: const Text("Create Item",
+                const SizedBox(height: 20),
+                const Text("Select Category",
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-            ],
+                        fontWeight: FontWeight.bold, color: Colors.grey)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _categoryChip("PRODUCE", tempCategory, (val) {
+                      setModalState(() => tempCategory = val);
+                    }),
+                    const SizedBox(width: 10),
+                    _categoryChip("DAIRY & EGGS", tempCategory, (val) {
+                      setModalState(() => tempCategory = val);
+                    }),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () {
+                    if (nameController.text.isNotEmpty) {
+                      ref
+                          .read(shoppingListProvider.notifier)
+                          .addItem(nameController.text, tempCategory);
+                      Navigator.pop(context);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryGreen,
+                    minimumSize: const Size(double.infinity, 55),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                  ),
+                  child: const Text("Create Item",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16)),
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  // Widget auxiliar para los chips de categoría
+  Widget _categoryChip(
+      String label, String currentSelected, Function(String) onSelected) {
+    bool isSelected = label == currentSelected;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) => onSelected(label),
+      selectedColor: AppColors.primaryGreen.withOpacity(0.2),
+      backgroundColor: Colors.grey[100],
+      labelStyle: TextStyle(
+        color: isSelected ? AppColors.primaryGreen : Colors.grey[600],
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        fontSize: 12,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+            color: isSelected ? AppColors.primaryGreen : Colors.transparent),
+      ),
+      showCheckmark: false,
     );
   }
 
@@ -109,7 +128,6 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      // AGREGAMOS EL BOTÓN FLOTANTE
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddItemDialog(context, ref),
         backgroundColor: AppColors.primaryGreen,
@@ -139,8 +157,8 @@ class HomeScreen extends ConsumerWidget {
       bottomNavigationBar: _buildBottomNav(context),
     );
   }
-  // --- MÉTODOS PRIVADOS CORREGIDOS ---
 
+  // ... (Los métodos _buildHeader, _buildBottomNav y _navItem se mantienen igual que en tu código anterior)
   Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,9 +188,8 @@ class HomeScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFE0F2F1),
-                borderRadius: BorderRadius.circular(12),
-              ),
+                  color: const Color(0xFFE0F2F1),
+                  borderRadius: BorderRadius.circular(12)),
               child: const Row(
                 children: [
                   CircleAvatar(
@@ -191,16 +208,13 @@ class HomeScreen extends ConsumerWidget {
       ],
     );
   }
-// En home_screen.dart
 
   Widget _buildBottomNav(BuildContext context) {
-    // Añadimos context
     return Container(
       padding: const EdgeInsets.only(bottom: 20, left: 12, right: 12, top: 10),
       decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -208,13 +222,11 @@ class HomeScreen extends ConsumerWidget {
           _navItem(Icons.history, "History", isSelected: false, onTap: () {}),
           _navItem(Icons.auto_awesome, "Insights",
               isSelected: false, onTap: () {}),
-          // BOTÓN SYNC: Navega a la pantalla de QR
           _navItem(Icons.sync, "Sync", isSelected: false, onTap: () {
             Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const SyncPartnerScreen()),
-            );
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const SyncPartnerScreen()));
           }),
         ],
       ),

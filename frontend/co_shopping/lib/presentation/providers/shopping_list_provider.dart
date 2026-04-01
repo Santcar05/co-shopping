@@ -30,14 +30,15 @@ class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
     ];
   }
 
-  void addItem(String name, String category) {
+  void addItem(String name, String category, {bool isAI = false}) {
     state = [
       ...state,
       ShoppingItem(
         id: DateTime.now().toString(),
         name: name,
-        subtitle: "Added manually",
+        subtitle: isAI ? "AI Suggested" : "Added manually",
         category: category,
+        isAI: isAI,
       )
     ];
   }
