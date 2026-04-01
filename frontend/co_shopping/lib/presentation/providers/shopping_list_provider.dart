@@ -37,8 +37,14 @@ class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
   }
 
   // Función para agregar desde el Smart Refill
-  void addItem(ShoppingItem item) {
-    state = [...state, item];
+  void addItem(String name, String category) {
+    final newItem = ShoppingItem(
+      id: DateTime.now().toString(), // ID temporal
+      name: name,
+      subtitle: "Added manually",
+      category: category,
+    );
+    state = [...state, newItem];
   }
 }
 

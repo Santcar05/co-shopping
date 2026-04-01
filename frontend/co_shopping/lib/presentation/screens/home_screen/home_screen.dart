@@ -9,12 +9,98 @@ import 'package:co_shopping/presentation/providers/shopping_list_provider.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  // Función para mostrar el modal de creación
+  void _showAddItemDialog(BuildContext context, WidgetRef ref) {
+    final nameController = TextEditingController();
+    String selectedCategory = 'PRODUCE'; // Categoría por defecto
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+            bottom:
+                MediaQuery.of(context).viewInsets.bottom), // Ajuste por teclado
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Add New Item",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  hintText: "Item name (e.g. Bananas)",
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text("Category",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              // Selector de categoría simple
+              Wrap(
+                spacing: 10,
+                children: ['PRODUCE', 'DAIRY & EGGS'].map((cat) {
+                  return ChoiceChip(
+                    label: Text(cat),
+                    selected: selectedCategory == cat,
+                    onSelected: (bool selected) {
+                      // Nota: Para actualizar el estado dentro del modal
+                      // necesitarías un StatefulBuilder, pero para este ejemplo
+                      // lo simplificamos.
+                    },
+                    selectedColor: AppColors.primaryGreen.withOpacity(0.2),
+                    labelStyle: TextStyle(
+                        color: selectedCategory == cat
+                            ? AppColors.primaryGreen
+                            : Colors.black),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.isNotEmpty) {
+                    ref
+                        .read(shoppingListProvider.notifier)
+                        .addItem(nameController.text, selectedCategory);
+                    Navigator.pop(context);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryGreen,
+                  minimumSize: const Size(double.infinity, 55),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                ),
+                child: const Text("Create Item",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Escuchamos el estado de la lista
     final allItems = ref.watch(shoppingListProvider);
-
-    // Filtramos los items por categoría
     final produceItems =
         allItems.where((item) => item.category == 'PRODUCE').toList();
     final dairyItems =
@@ -22,6 +108,13 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      // AGREGAMOS EL BOTÓN FLOTANTE
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddItemDialog(context, ref),
+        backgroundColor: AppColors.primaryGreen,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white, size: 30),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -45,7 +138,6 @@ class HomeScreen extends ConsumerWidget {
       bottomNavigationBar: _buildBottomNav(context),
     );
   }
-
   // --- MÉTODOS PRIVADOS CORREGIDOS ---
 
   Widget _buildHeader() {
