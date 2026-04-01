@@ -1,0 +1,46 @@
+name: co_shopping
+description: 'App de lista de compras P2P con IA local.'
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.3.0 # Mayor compatibilidad con paquetes P2P
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- GESTIÓN DE ESTADO ---
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # --- PERSISTENCIA LOCAL ---
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.2
+
+  # --- NETWORKING & P2P ---
+  flutter_webrtc: ^0.10.0
+  web_socket_channel: ^2.4.3
+  uuid: ^4.3.3
+
+  # --- UI & UX ---
+  google_fonts: ^6.2.1
+  # VERSIÓN CORREGIDA AQUÍ:
+  animated_list_plus: ^0.5.2
+  cupertino_icons: ^1.0.6
+  # Para generar QR codes para compartir listas
+  qr_flutter: ^4.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+  # --- GENERADORES DE CÓDIGO ---
+  build_runner: ^2.4.8
+  isar_generator: ^3.1.0+1
+  riverpod_generator: ^2.3.9
+
+flutter:
+  uses-material-design: true
