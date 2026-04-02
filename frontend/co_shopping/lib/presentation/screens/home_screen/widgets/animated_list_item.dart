@@ -25,15 +25,14 @@ class ShoppingItemTile extends ConsumerWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(28),
-        // Acción: Al tocar el item, se marca como comprado
-        onTap: () =>
-            ref.read(shoppingListProvider.notifier).toggleItem(item.id),
+        onTap: () => ref
+            .read(shoppingListProvider.notifier)
+            .toggleItem(item.uuid), // CAMBIO: uuid
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              _buildCustomCheckbox(
-                  item.isChecked), // Corregido: Ahora pasamos el bool
+              _buildCustomCheckbox(item.isChecked),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -75,7 +74,6 @@ class ShoppingItemTile extends ConsumerWidget {
     );
   }
 
-  // Definición correcta de la función
   Widget _buildCustomCheckbox(bool checked) {
     return Container(
       width: 26,

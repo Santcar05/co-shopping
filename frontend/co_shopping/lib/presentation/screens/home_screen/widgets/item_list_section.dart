@@ -21,7 +21,7 @@ class ItemListSection extends StatelessWidget {
         ),
         // Mapeamos los items al nuevo ItemListCard
         ...items
-            .map((item) => ItemListCard(key: ValueKey(item.id), item: item)),
+            .map((item) => ItemListCard(key: ValueKey(item.uuid), item: item)),
       ],
     );
   }

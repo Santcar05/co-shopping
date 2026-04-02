@@ -1,68 +1,86 @@
-import 'package:co_shopping/data/models/shopping_item.dart';
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/models/shopping_item.dart';
+import '../../data/repositories/shopping_item_repository.dart';
 
+/// Notifier que actúa como puente entre la UI y Isar (Single Source of Truth)
 class ShoppingListNotifier extends StateNotifier<List<ShoppingItem>> {
-  ShoppingListNotifier()
-      : super([
-          ShoppingItem(
-              id: '1',
-              name: 'Organic Kale',
-              subtitle: 'Added by Sarah',
-              category: 'PRODUCE'),
-          ShoppingItem(
-              id: '2',
-              name: 'Honeycrisp Apples',
-              subtitle: 'AI Sorted',
-              category: 'PRODUCE',
-              isAI: true),
-          ShoppingItem(
-              id: '3',
-              name: 'Pasture Raised Eggs',
-              subtitle: 'Sarah got this',
-              category: 'DAIRY & EGGS',
-              isChecked: true),
-        ]);
+  final ShoppingItemRepository _repository;
+  StreamSubscription<List<ShoppingItem>>? _subscription;
 
-  void toggleItem(String id) {
-    state = [
-      for (final item in state)
-        if (item.id == id) item.copyWith(isChecked: !item.isChecked) else item,
-    ];
+  ShoppingListNotifier(this._repository) : super([]) {
+    _init();
   }
 
-  void addItem(String name, String category, {bool isAI = false}) {
-    state = [
-      ...state,
-      ShoppingItem(
-        id: DateTime.now().toString(),
-        name: name,
-        subtitle: isAI ? "AI Suggested" : "Added manually",
-        category: category,
-        isAI: isAI,
-      )
-    ];
+  /// Se suscribe al stream de Isar para que cualquier cambio (local o P2P)
+  /// actualice el estado de la UI automáticamente.
+  void _init() {
+    _subscription = _repository.watchAllActive().listen((items) {
+      state = items;
+    });
   }
 
-  void deleteItem(String id) {
-    state = state.where((item) => item.id != id).toList();
+  // --- ACCIONES ---
+  // Nota: Todas las acciones ahora persisten en Isar.
+  // No modificamos 'state' manualmente; el stream de arriba se encarga de eso.
+
+  Future<void> addItem(String name, String category,
+      {bool isAI = false}) async {
+    final newItem = ShoppingItem.create(
+      name: name,
+      category: category,
+      isAI: isAI,
+      subtitle: isAI ? 'AI Suggested' : 'Added by you',
+    );
+    await _repository.insert(newItem);
   }
 
-  void toggleHighlight(String id) {
-    state = state
-        .map((item) => item.id == id
-            ? item.copyWith(isHighlighted: !item.isHighlighted)
-            : item)
-        .toList();
+  Future<void> toggleItem(String uuid) async {
+    final item = await _repository.getByUuid(uuid);
+    if (item != null) {
+      item.isChecked = !item.isChecked;
+      await _repository.update(item);
+    }
   }
 
-  void editItem(String id, String newName) {
-    state = state
-        .map((item) => item.id == id ? item.copyWith(name: newName) : item)
-        .toList();
+  Future<void> deleteItem(String uuid) async {
+    // Usamos softDelete para mantener consistencia en la sincronización P2P
+    await _repository.softDelete(uuid);
+  }
+
+  Future<void> toggleHighlight(String uuid) async {
+    final item = await _repository.getByUuid(uuid);
+    if (item != null) {
+      item.isHighlighted = !item.isHighlighted;
+      await _repository.update(item);
+    }
+  }
+
+  Future<void> editItem(String uuid, String newName) async {
+    final item = await _repository.getByUuid(uuid);
+    if (item != null) {
+      item.name = newName;
+      await _repository.update(item);
+    }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 }
 
+// --- PROVIDERS ---
+
+/// Provider para el repositorio (puedes moverlo a un archivo de repositorios si prefieres)
+final shoppingRepositoryProvider = Provider<ShoppingItemRepository>((ref) {
+  return ShoppingItemRepository();
+});
+
+/// Provider global de la lista de compras
 final shoppingListProvider =
     StateNotifierProvider<ShoppingListNotifier, List<ShoppingItem>>((ref) {
-  return ShoppingListNotifier();
+  final repo = ref.watch(shoppingRepositoryProvider);
+  return ShoppingListNotifier(repo);
 });

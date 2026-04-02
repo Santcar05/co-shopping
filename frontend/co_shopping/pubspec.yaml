@@ -1,10 +1,10 @@
 name: co_shopping
-description: 'App de lista de compras P2P con IA local.'
+description: 'App de lista de compras P2P con IA local'
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.0+1
 
 environment:
-  sdk: ^3.3.0 # Mayor compatibilidad con paquetes P2P
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -12,35 +12,46 @@ dependencies:
 
   # --- GESTIÓN DE ESTADO ---
   flutter_riverpod: ^2.5.1
-  riverpod_annotation: ^2.3.5
 
-  # --- PERSISTENCIA LOCAL ---
+  # --- PERSISTENCIA LOCAL (ISAR) ---
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
   path_provider: ^2.1.2
 
-  # --- NETWORKING & P2P ---
-  flutter_webrtc: ^0.10.0
-  web_socket_channel: ^2.4.3
-  uuid: ^4.3.3
+  # --- IA LOCAL (WEBVIEW) ---
+  flutter_inappwebview: ^6.0.0
 
-  # --- UI & UX ---
-  google_fonts: ^6.2.1
-  # VERSIÓN CORREGIDA AQUÍ:
-  animated_list_plus: ^0.5.2
-  cupertino_icons: ^1.0.6
-  # Para generar QR codes para compartir listas
+  # --- QR CODES ---
   qr_flutter: ^4.1.0
+  mobile_scanner: ^3.5.5
+
+  # --- PERMISOS ---
+  permission_handler: ^11.3.0
+
+  # --- UI & UTILIDADES ---
+  google_fonts: ^6.2.1
+  cupertino_icons: ^1.0.6
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^3.0.1
 
-  # --- GENERADORES DE CÓDIGO ---
-  build_runner: ^2.4.8
-  isar_generator: ^3.1.0+1
-  riverpod_generator: ^2.3.9
+  # --- PERSISTENCIA LOCAL (ISAR) ---
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.2
 
+  # --- P2P & NETWORKING ---
+  # Actualizamos a la 0.12.1 que elimina el uso de 'Registrar'
+  flutter_webrtc: ^0.12.1
+  web_socket_channel: ^3.0.1
+  uuid: ^4.3.3
 flutter:
   uses-material-design: true
+
+  # Assets necesarios para la IA local (Prompt 6)
+  assets:
+    - assets/ai/
+    - assets/ai/ai_model.html
